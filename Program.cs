@@ -41,27 +41,37 @@ namespace warbucks
                     // don't worry about converting balances because it won't matter
                     var mainAccount = accountResponse.Value.OrderByDescending(x => x.balance).First();
 
-                    var currentPercentageDiff = (   CurrencyPrices.GetCurrentBuy(mainAccount.currency) -
-                                                    CurrencyPrices.GetAverageBuy30MinsAgo(mainAccount.currency)) / 
-                                                    CurrencyPrices.GetAverageBuy30MinsAgo(mainAccount.currency);
+                    var currentPercentageDiff = (CurrencyPrices.GetCurrentBuy(mainAccount.currency) -
+                            CurrencyPrices.GetAverageBuy30MinsAgo(mainAccount.currency)) /
+                        CurrencyPrices.GetAverageBuy30MinsAgo(mainAccount.currency);
 
                     var otherPercentageDiffs = new Dictionary<string, decimal>();
 
                     CurrencyPrices.Currencies.Where(x => x != mainAccount.currency).ToList().ForEach(otherCurrency =>
                     {
-                        var otherDiff = (   CurrencyPrices.GetCurrentBuy(mainAccount.currency) -
-                                            CurrencyPrices.GetAverageBuy30MinsAgo(mainAccount.currency)) / 
-                                            CurrencyPrices.GetAverageBuy30MinsAgo(mainAccount.currency);
+                        var otherDiff = (CurrencyPrices.GetCurrentBuy(mainAccount.currency) -
+                                CurrencyPrices.GetAverageBuy30MinsAgo(mainAccount.currency)) /
+                            CurrencyPrices.GetAverageBuy30MinsAgo(mainAccount.currency);
 
                         otherPercentageDiffs[otherCurrency] = otherDiff;
                     });
 
-                    // find best price difference
-                    // if better than current account by some threshhold, then sell and buy
-                    // may require selling in bitcoin then buying in another currency, 
-                    // which means two transaction fees not one
+                    var currentCurrencyPrice = CurrencyPrices.GetCurrentBuy(mainAccount.currency);
 
-                    // todo: write above
+                    Console.WriteLine($"We have {(mainAccount.balance * currentCurrencyPrice).ToString("C")} in {mainAccount.currency}.");
+                    Console.WriteLine($"Percent change last 30 mins: {currentPercentageDiff.ToString("p2")}");
+                    Console.WriteLine($"Dollar diff last 30 minutes: {(currentCurrencyPrice * currentPercentageDiff).ToString("C")}");
+                    Console.WriteLine();
+
+                    foreach (var otherCurrency in otherPercentageDiffs.Keys)
+                    {
+                        Console.WriteLine($"For {otherCurrency}:");
+                        Console.WriteLine($"Percent change last 30 mins: {otherPercentageDiffs[otherCurrency].ToString("p2")}");
+                        Console.WriteLine($"Dollar diff last 30 minutes: {(CurrencyPrices.GetCurrentBuy(otherCurrency) * otherPercentageDiffs[otherCurrency]).ToString("C")}");
+                        Console.WriteLine();
+                    }
+                    Console.WriteLine("---------------------------");
+                    Console.WriteLine("---------------------------");
                 }
 
                 await Task.Delay((int) TimeSpan.FromMinutes(1).TotalMilliseconds);
