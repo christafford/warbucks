@@ -19,13 +19,7 @@ namespace warbucks
             // begin grabbing prices
             CurrencyPrices.Run();
 
-            // todo: use events!
-            await Task.Delay(TimeSpan.FromMinutes(30));
-
-            while (!CurrencyPrices.IsReady)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(1));
-            }
+            
 
             while (true)
             {

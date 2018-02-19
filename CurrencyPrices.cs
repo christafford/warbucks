@@ -17,12 +17,14 @@ namespace warbucks
             "LTC-USD"
         };
 
-        private static List<Dictionary<string, ProductTicker>> PriceHistory = new List<Dictionary<string, ProductTicker>>();
+        public static event EventHandler Ready;
 
-        public static bool IsReady => PriceHistory.Count() > 59;
+        private static List<Dictionary<string, ProductTicker>> PriceHistory = new List<Dictionary<string, ProductTicker>>();
 
         public static async Task Run()
         {
+            var ready = false;
+
             while (true)
             {
                 var toAdd = new Dictionary<string, ProductTicker>();
@@ -48,10 +50,19 @@ namespace warbucks
                 if (PriceHistory.Count() > 60)
                 {
                     PriceHistory = PriceHistory.GetRange(1, PriceHistory.Count() - 1);
+
+                    if (!ready)
+                    {
+                        ready = true;
+                        if (Ready != null)
+                        {
+                            Ready(null, null);
+                        }
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"{PriceHistory.Count()} of 60 - prepopulating.");
+                    Console.WriteLine($"{PriceHistory.Count()} - prepopulating.");
                 }
 
                 await Task.Delay((int) TimeSpan.FromSeconds(30).TotalMilliseconds);
@@ -61,12 +72,12 @@ namespace warbucks
         public static decimal GetAverageBuy30MinsAgo(string currency)
         {
             // todo: make this more accurate somehow. Easiest would be to average the first N items, weighted towards the earliest.
-            return PriceHistory.First()[currency].ask;
+            return PriceHistory.First() [currency].ask;
         }
 
         public static decimal GetCurrentBuy(string currency)
         {
-            return PriceHistory.Last()[currency].ask;
+            return PriceHistory.Last() [currency].ask;
         }
     }
 }

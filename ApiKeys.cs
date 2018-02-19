@@ -7,7 +7,7 @@ namespace warbucks
     {
         private ApiKeys()
         {
-            var apiInfo = File.ReadAllText("c:\\Temp\\ApiInfo.txt").Replace("\r", string.Empty).Split('\n');
+            var apiInfo = File.ReadAllText("ApiInfo.txt").Replace("\r", string.Empty).Split('\n');
 
             ApiKey = apiInfo[0];
             ApiSecret = apiInfo[1];
